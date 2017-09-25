@@ -1,0 +1,14 @@
+{
+  "apps": [{
+    "name": "seoulDrinkerApi",
+    "script": "build/index.js",
+    "watch": false,
+    "env": {
+      "NODE_ENV": "production"
+    },
+    "exec_mode": "cluster",
+    "instances": 0,
+    "autorestart": true,
+    "restart_delay": 1000
+  }]
+}
