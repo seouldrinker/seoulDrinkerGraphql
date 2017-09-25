@@ -33,7 +33,8 @@ app.use(session({
   secret: SESSION_SECRET,
   resave: false,
   saveUninitialized: true,
-  store: new MongoStore({ url: SESSION_DB_URL })
+  store: new MongoStore({ url: SESSION_DB_URL }),
+  fallbackMemory: false
 }))
 app.use(cookieParser())
 app.use(cors())

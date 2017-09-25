@@ -6,7 +6,7 @@
   "scripts": {
     "test": "mocha --compilers js:babel-core/register",
     "clean": "rm -rf build/**",
-    "build": "babel api/server.js --out-dir build",
+    "build": "babel api --out-dir build",
     "start": "npm run build && node ./build/index.js",
     "debug": "npm run build && DEBUG=express:* node ./build/index.js",
     "pm2.dev.start": "pm2 start .pm2rc.dev.json && pm2 logs seoulDrinkerApi",
