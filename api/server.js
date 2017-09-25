@@ -28,7 +28,11 @@ db.on('error', console.error.bind(console, 'connection error:'))
 db.once('open', console.log.bind(console, "Connected to mongod server"))
 
 // config - logs, cookie, cors, route, exception
-app.use(morgan('combined', {stream: fs.createWriteStream(path.join(__dirname + '/../logs', 'access.log'), {flags: 'a'})}))
+app.use(morgan('combined', {
+  stream: fs.createWriteStream(
+    path.join(__dirname + '/../logs', 'access.log'), { flags: 'a' }
+  )
+}))
 app.use(session({
   secret: SESSION_SECRET,
   resave: false,
