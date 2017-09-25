@@ -3,5 +3,5 @@ node_modules
 build
 logs/*
 config.js
-feeds/
+images/
 npm-debug.log
