@@ -5,9 +5,9 @@ const Schema = mongoose.Schema
 export default mongoose.model('User', new Schema({
   id: String,
   platform: String,
+  is_ok: Number,
   feeds: [{ type: Schema.Types.ObjectId, ref: 'Feed' }],
-  badges: [{ type: Schema.Types.ObjectId, ref: 'Badge' }],
-  is_ok: 1,
+  rewards: [{ type: Schema.Types.ObjectId, ref: 'Reward' }],
   crt_dt: {
     type: Date,
     default: Date.now
