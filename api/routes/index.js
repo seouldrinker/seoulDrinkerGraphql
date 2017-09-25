@@ -1,7 +1,8 @@
 import express from 'express'
 
-import explore from './explore'
 import feed from './feed'
+import pub from './pub'
+import beer from './beer'
 import info from './info'
 
 import { checkAuth, checkRegister } from '../middleware/authentication'
@@ -9,15 +10,16 @@ import { checkAuth, checkRegister } from '../middleware/authentication'
 const router = express.Router()
 
 router.use('/', express.static(__dirname + '/../../'))
-router.use('/static', express.static(__dirname + '/../../feeds'))
+router.use('/static', express.static(__dirname + '/../../images'))
 
 // [auth]
 // router.use(checkAuth)
 // router.use(checkRegister)
 
-router.use('/srb/vbeta/explore', explore)
-router.use('/srb/vbeta/feed', feed)
-router.use('/srb/vbeta/info', info)
+router.use('/seoulDrinkerApi/vbeta/feed', feed)
+router.use('/seoulDrinkerApi/vbeta/pub', pub)
+router.use('/seoulDrinkerApi/vbeta/beer', beer)
+router.use('/seoulDrinkerApi/vbeta/info', info)
 
 export default router
 
