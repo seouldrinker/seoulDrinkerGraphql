@@ -7,7 +7,7 @@
       "NODE_ENV": "development"
     },
     "exec_mode": "cluster",
-    "instances": 0,
+    "instances": 1,
     "autorestart": true,
     "restart_delay": 1000
   }]
