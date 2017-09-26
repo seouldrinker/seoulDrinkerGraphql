@@ -6,7 +6,10 @@ export default mongoose.model('Badge', new Schema({
   name: String,
   context: String,
   image: String,
-  is_ok: 1,
+  is_ok: {
+    type: Number,
+    default: 1
+  },
   crt_dt: {
     type: Date,
     default: Date.now

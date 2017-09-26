@@ -10,7 +10,10 @@ export default mongoose.model('Beer', new Schema({
   feature: String,
   style: String,
   release: String,
-  is_ok: 1,
+  is_ok: {
+    type: Number,
+    default: 1
+  },
   crt_dt: {
     type: Date,
     default: Date.now

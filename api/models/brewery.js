@@ -14,7 +14,10 @@ export default mongoose.model('Brewery', new Schema({
   brand_image: String,
   beers: [{ type: Schema.Types.ObjectId, ref: 'Beer' }],
   pubs: [{ type: Schema.Types.ObjectId, ref: 'Pub' }],
-  is_ok: 1,
+  is_ok: {
+    type: Number,
+    default: 1
+  },
   crt_dt: {
     type: Date,
     default: Date.now

@@ -7,7 +7,10 @@ export default mongoose.model('Pub', new Schema({
   eng_name: String,
   location: String,
   phone: String,
-  is_ok: 1,
+  is_ok: {
+    type: Number,
+    default: 1
+  },
   crt_dt: {
     type: Date,
     default: Date.now

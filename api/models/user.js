@@ -7,7 +7,10 @@ export default mongoose.model('User', new Schema({
   platform: String,
   feeds: [{ type: Schema.Types.ObjectId, ref: 'Feed' }],
   badges: [{ type: Schema.Types.ObjectId, ref: 'Badge' }],
-  is_ok: 1,
+  is_ok: {
+    type: Number,
+    default: 1
+  },
   crt_dt: {
     type: Date,
     default: Date.now
