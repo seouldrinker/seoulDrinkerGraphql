@@ -12,7 +12,7 @@ import connectMongo from 'connect-mongo'
 import index from './routes/index'
 
 // [database]
-import { DB_URL, SESSION_DB_URL, SESSION_SECRET } from './config'
+import { DB_URL, SESSION_SECRET } from './config'
 
 const app = express()
 const router = express.Router()
@@ -37,7 +37,7 @@ app.use(session({
   secret: SESSION_SECRET,
   resave: false,
   saveUninitialized: true,
-  store: new MongoStore({ url: SESSION_DB_URL }),
+  store: new MongoStore({ mongooseConnection: mongoose.connection }),
   fallbackMemory: false
 }))
 app.use(cookieParser())
