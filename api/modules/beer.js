@@ -14,12 +14,12 @@ export function getBeerList (next) {
 
 export function getBeerDetail (id, next) {
   return Beer.findOne({is_ok: 1, _id: id}).sort({crt_dt: -1})
-    .populate('images').exec((err, feeds) => {
+    .exec((err, beer) => {
     if (err) {
       let errDetail = new Error('Database failure.')
       errDetail.status = 500
       return next(errDetail)
     }
-    return feeds
+    return beer
   })
 }
