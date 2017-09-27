@@ -3,6 +3,7 @@ import mongoose from 'mongoose'
 const Schema = mongoose.Schema
 
 export default mongoose.model('Pub', new Schema({
+  brewery: { type: Schema.Types.ObjectId, ref: 'Brewery' },
   kor_name: String,
   eng_name: String,
   location: String,

@@ -12,8 +12,6 @@ export default mongoose.model('Brewery', new Schema({
   homepage: String,
   logo_image: String,
   brand_image: String,
-  beers: [{ type: Schema.Types.ObjectId, ref: 'Beer' }],
-  pubs: [{ type: Schema.Types.ObjectId, ref: 'Pub' }],
   is_ok: {
     type: Number,
     default: 1

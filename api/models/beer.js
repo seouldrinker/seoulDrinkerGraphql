@@ -3,6 +3,7 @@ import mongoose from 'mongoose'
 const Schema = mongoose.Schema
 
 export default mongoose.model('Beer', new Schema({
+  brewery: { type: Schema.Types.ObjectId, ref: 'Brewery' },
   kor_name: String,
   eng_name: String,
   image: String,
