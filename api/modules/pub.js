@@ -3,9 +3,10 @@ import Pub from '../models/pub'
 function _filteredPubList (location) {
   let pubList = Pub.find({is_ok: 1})
   if (location) {
-    pubList = pubList.$where(() => {
-      return this.location.indexOf(location) > -1
-    })
+    pubList = Pub.find({is_ok: 1, location: {
+      $regex: '.*' + location + '.*',
+      $options: 'i'
+    }})
   }
   return pubList
 }
@@ -24,7 +25,7 @@ export function getPubList (location, next) {
 
 export function getPubDetail (id, next) {
   return Pub.findOne({is_ok: 1, _id: id}).sort({crt_dt: -1})
-    .exec((err, pub) => {
+    .populate('brewery').exec((err, pub) => {
     if (err) {
       let errDetail = new Error('Database failure.')
       errDetail.status = 500

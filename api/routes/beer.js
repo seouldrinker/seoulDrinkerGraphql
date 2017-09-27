@@ -5,7 +5,7 @@ import { getBeerList, getBeerDetail } from '../modules/beer'
 const router = express.Router()
 
 router.get('/', async (req, res, next) => {
-  const results = await getBeerList(next)
+  const results = await getBeerList(req.query.name, next)
   if (results && typeof results !== 'undefined') {
     return res.send({
       code: 200,
