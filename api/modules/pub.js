@@ -12,7 +12,20 @@ function _filteredPubList (location) {
   return pubList
 }
 
-export function getPubList (location) {
+export function getPagePubList (req) {
+  const page = (!req.query.page || req.query.page <= 0) ? 1 : req.query.page
+  const count = (!req.query.count || req.query.count <= 0) ? 20 : req.query.count
+
+  return _filteredPubList(req.query.location).sort({crt_dt: -1})
+    .limit(Number(count)).skip((page-1) * count).exec((err, pubList) => {
+    if (err) {
+      return null
+    }
+    return pubList
+  })
+}
+
+export function getAllPubList (location) {
   return _filteredPubList(location).sort({crt_dt: -1})
     .exec((err, pubList) => {
     if (err) {
