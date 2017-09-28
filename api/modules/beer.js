@@ -1,4 +1,5 @@
 import Beer from '../models/beer'
+import Brewery from '../models/brewery'
 
 function _filteredBeerList (name) {
   let beerList = Beer.find({is_ok: 1})

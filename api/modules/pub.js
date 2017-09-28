@@ -1,4 +1,5 @@
 import Pub from '../models/pub'
+import Brewery from '../models/brewery'
 
 function _filteredPubList (location) {
   let pubList = Pub.find({is_ok: 1})
