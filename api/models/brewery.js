@@ -12,6 +12,8 @@ export default mongoose.model('Brewery', new Schema({
   homepage: String,
   logo_image: String,
   brand_image: String,
+  instagram: String,
+  facebook: String,
   is_ok: {
     type: Number,
     default: 1
