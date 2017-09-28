@@ -20,25 +20,25 @@ function _filteredBeerList (name) {
   return beerList
 }
 
-export function getBeerList (name, next) {
+export function getBeerList (name) {
   return _filteredBeerList(name).sort({crt_dt: -1})
     .exec((err, beerList) => {
     if (err) {
-      let errDetail = new Error('Database failure.')
-      errDetail.status = 500
-      return next(errDetail)
+      return null
     }
     return beerList
   })
 }
 
-export function getBeerDetail (id, next) {
+export function getBeerDetail (id) {
+  if (id.length !== 24) {
+    return null
+  }
+
   return Beer.findOne({is_ok: 1, _id: id}).sort({crt_dt: -1})
     .populate('brewery').exec((err, beer) => {
     if (err) {
-      let errDetail = new Error('Database failure.')
-      errDetail.status = 500
-      return next(errDetail)
+      return null
     }
     return beer
   })

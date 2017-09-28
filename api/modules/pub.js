@@ -11,25 +11,25 @@ function _filteredPubList (location) {
   return pubList
 }
 
-export function getPubList (location, next) {
+export function getPubList (location) {
   return _filteredPubList(location).sort({crt_dt: -1})
     .exec((err, pubList) => {
     if (err) {
-      let errDetail = new Error('Database failure.')
-      errDetail.status = 500
-      return next(errDetail)
+      return null
     }
     return pubList
   })
 }
 
-export function getPubDetail (id, next) {
+export function getPubDetail (id) {
+  if (id.length !== 24) {
+    return null
+  }
+
   return Pub.findOne({is_ok: 1, _id: id}).sort({crt_dt: -1})
     .populate('brewery').exec((err, pub) => {
     if (err) {
-      let errDetail = new Error('Database failure.')
-      errDetail.status = 500
-      return next(errDetail)
+      return null
     }
     return pub
   })
