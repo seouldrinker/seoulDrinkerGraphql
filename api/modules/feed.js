@@ -3,40 +3,30 @@ import Beer from '../models/beer'
 import Pub from '../models/pub'
 import User from '../models/user'
 
-export function getAllFeedList (next) {
-  return Feed.find({is_ok: 1}).sort({crt_dt: -1})
-    .populate('beers', 'pub', 'user').exec((err, feeds) => {
+export function getFeedList (req) {
+  let findFeeds = Feed.find({is_ok: 1}).sort({crt_dt: -1})
+
+  if (!req.query.type || req.query.type !== 'all') {
+    const page = (!req.query.page || req.query.page <= 0)
+      ? 1 : req.query.page
+    const count = (!req.query.count || req.query.count <= 0)
+      ? 20 : req.query.count
+    findFeeds = findFeeds.limit(Number(count)).skip((page-1) * count)
+  }
+
+  return findFeeds.populate('beers', 'pub', 'user').exec((err, feeds) => {
     if (err) {
-      let errDetail = new Error('Database failure.')
-      errDetail.status = 500
-      return next(errDetail)
+      return null
     }
     return feeds
   })
 }
-
-export function getPageFeedList (req, next) {
-  const page = (!req.query.page || req.query.page <= 0) ? 1 : req.query.page
-  const count = !req.query.count ? 20 : req.query.count
-
-  return Feed.find({is_ok: 1}).sort({crt_dt: -1})
-    .limit(Number(count)).skip((page-1) * count)
-    .populate('beers', 'pub', 'user').exec((err, feeds) => {
-    if (err) {
-      let errDetail = new Error('Database failure.')
-      errDetail.status = 500
-      return next(errDetail)
-    }
-    return feeds
-  })
-}
-
 
 /**
   NOTE: 피드 저장 (저장 전에 이미지들 부터 저장 후 진행)
 **/
 export function insertFeed (req, next) {
-  
+
 }
 
 function _saveImages (req, next) {

@@ -1,16 +1,11 @@
 import express from 'express'
 
-import { getPageBeerList, getAllBeerList, getBeerDetail } from '../modules/beer'
+import { getBeerList, getBeerDetail } from '../modules/beer'
 
 const router = express.Router()
 
 router.get('/', async (req, res, next) => {
-  let results = null
-  if (!req.query.type || req.query.type !== 'all') {
-    results = await getPageBeerList(req)
-  } else {
-    results = await getAllBeerList(req.query.name)
-  }
+  const results = await getBeerList(req)
 
   if (results && typeof results !== 'undefined') {
     return res.send({

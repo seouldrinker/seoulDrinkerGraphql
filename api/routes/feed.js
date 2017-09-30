@@ -1,7 +1,7 @@
 import express from 'express'
 import bodyParser from 'body-parser'
 
-import { insertFeed, updateFeed, deleteFeed, getAllFeedList, getPageFeedList } from '../modules/feed'
+import { insertFeed, updateFeed, deleteFeed, getFeedList } from '../modules/feed'
 import { imageUpload } from '../middleware/image'
 
 const router = express.Router()
@@ -12,12 +12,8 @@ router.use(bodyParser.urlencoded({
 }))
 
 router.route('/').get(async (req, res, next) => {
-  let results = null
-  if (!req.query.type || req.query.type !== 'all') {
-    results = await getPageFeedList(req)
-  } else {
-    results = await getAllFeedList()
-  }
+  const results = await getFeedList(req)
+
   if (results && typeof results !== 'undefined') {
     return res.send({
       code: 200,
