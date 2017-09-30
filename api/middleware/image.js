@@ -10,24 +10,16 @@ export function imageUpload (req, res, next) {
   const upload = multer({
     storage: multer.diskStorage({
       destination: function (req, file, cb) {
-        cb(null, 'feeds/')
+        cb(null, 'images/feeds/')
       },
       filename: function (req, file, cb) {
         const currentDate = new Date()
-        cb(null, file.fieldname
-          + (file.fieldname === 'map' ? mapCounter++ : imageCounter++) + '_'
-          + currentDate.getFullYear()
-          + (currentDate.getMonth() < 10 ? '0' : '') + currentDate.getMonth()
-          + (currentDate.getDate() < 10 ? '0' : '') + currentDate.getDate()
-          + (currentDate.getHours() < 10 ? '0' : '') + currentDate.getHours()
-          + (currentDate.getMinutes() < 10 ? '0' : '') + currentDate.getMinutes()
-          + (currentDate.getSeconds() < 10 ? '0' : '') + currentDate.getSeconds()
+        cb(null, file.fieldname + '_' + currentDate.getTime()
           + '.' + file.mimetype.split('/')[1])
       }
     })
   }).fields([
-    { name: 'map', maxCount: 1 },
-    { name: 'photo', maxCount: 100 }
+    { name: 'feed', maxCount: 100 }
   ])
 
   upload(req, res, function (err) {
