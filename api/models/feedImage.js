@@ -3,6 +3,7 @@ import mongoose from 'mongoose'
 const Schema = mongoose.Schema
 
 export default mongoose.model('FeedImage', new Schema({
+  feed: { type: Schema.Types.ObjectId, ref: 'Feed' },
   image: String,
   is_ok: {
     type: Number,

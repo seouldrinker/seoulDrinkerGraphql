@@ -3,10 +3,10 @@ import mongoose from 'mongoose'
 const Schema = mongoose.Schema
 
 export default mongoose.model('Feed', new Schema({
-  context: String,
   beers: [{ type: Schema.Types.ObjectId, ref: 'Beer' }],
   pub: { type: Schema.Types.ObjectId, ref: 'Pub' },
-  feedImages: [{ type: Schema.Types.ObjectId, ref: 'FeedImage' }],
+  user: { type: Schema.Types.ObjectId, ref: 'User' },
+  context: String,
   is_ok: {
     type: Number,
     default: 1
