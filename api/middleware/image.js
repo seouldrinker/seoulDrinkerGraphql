@@ -19,7 +19,7 @@ export function imageUpload (req, res, next) {
       }
     })
   }).fields([
-    { name: 'feed', maxCount: 100 }
+    { name: 'feedImages', maxCount: 100 }
   ])
 
   upload(req, res, function (err) {
