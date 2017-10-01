@@ -13,7 +13,7 @@ export function checkAuth (req, res, next) {
     switch(req.query.platform) {
       case 'facebook':
         return _commonAuth(next,
-          'https://graph.facebook.com/me?fields=id,name,picture&access_token=',
+          'https://graph.facebook.com/me?fields=id,name,picture,email&access_token=',
           req.query, true)
         break
 
@@ -45,7 +45,7 @@ function _commonAuth(next, url, query, includeToken, headers) {
     {} : options.headers = headers
 
   return axios.get(mergedUrl, options).then(res => {
-    if ((query.platform === 'facebook' && res.data.id == query.id)
+    if ((query.platform === 'facebook' && res.data.email == query.id)
       || (query.platform === 'google' && res.data.email == query.id)
       || (query.platform === 'kakaotalk' && res.data.id == query.id)) {
       return next()
@@ -64,14 +64,15 @@ function _commonAuth(next, url, query, includeToken, headers) {
 export function checkRegister (req, res, next) {
   let errDetail = new Error('Database failure.')
   errDetail.status = 500
-  
+
   if (!req.query || !req.query.id || !req.query.platform) {
     let errDetail = new Error('You didn\'t have authentication.')
     errDetail.status = 401
     return next(errDetail)
   }
 
-  User.findOne({'id': req.query.id, 'platform': req.query.platform}).then((user, err) => {
+  User.findOne({'id': req.query.id, 'platform': req.query.platform})
+    .exec((err, user) => {
     if (err) {
       return next(errDetail)
     }
