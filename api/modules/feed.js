@@ -23,6 +23,35 @@ export async function getFeedList (req) {
     return feeds
   })
 
+  return _appendFeedImages(feeds)
+}
+
+
+export async function getPubFeedList (pub_id) {
+  const feeds = await Feed.find({is_ok: 1, pub: pub_id}).sort({crt_dt: -1})
+    .populate(['beers', 'pub', 'user']).exec((err, feeds) => {
+    if (err) {
+      return null
+    }
+    return feeds
+  })
+  return _appendFeedImages(feeds)
+}
+
+
+export async function getBeerFeedList (beer_id) {
+  const feeds = await Feed.find({is_ok: 1, beers: beer_id })
+  .sort({crt_dt: -1}).populate(['beers', 'pub', 'user']).exec((err, feeds) => {
+    if (err) {
+      return null
+    }
+    return feeds
+  })
+  return _appendFeedImages(feeds)
+}
+
+
+function _appendFeedImages (feeds) {
   return Promise.all(feeds.map(async (v, k) => {
     await FeedImage.find({is_ok: 1, feed: v._id}).sort({crt_dt: 1}).exec((err, feedImages) => {
       if (err) {
