@@ -6,6 +6,7 @@ export default mongoose.model('Feed', new Schema({
   beers: [{ type: Schema.Types.ObjectId, ref: 'Beer' }],
   pub: { type: Schema.Types.ObjectId, ref: 'Pub' },
   user: { type: Schema.Types.ObjectId, ref: 'User' },
+  _images: [{ type: Schema.Types.ObjectId, ref: 'FeedImage' }],
   context: String,
   is_ok: {
     type: Number,
