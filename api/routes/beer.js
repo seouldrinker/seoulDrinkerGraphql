@@ -18,8 +18,8 @@ router.get('/', async (req, res, next) => {
   return next(errDetail)
 })
 
-router.get('/:id', async (req, res, next) => {
-  const results = await getBeerDetail(req.params.id)
+router.get('/:beer_id', async (req, res, next) => {
+  const results = await getBeerDetail(req.params.beer_id)
   if (results && typeof results !== 'undefined') {
     return res.send({
       code: 200,

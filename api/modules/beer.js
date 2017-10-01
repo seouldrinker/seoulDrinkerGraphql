@@ -40,12 +40,12 @@ export function getBeerList (req) {
   })
 }
 
-export function getBeerDetail (id) {
-  if (id.length !== 24) {
+export function getBeerDetail (beer_id) {
+  if (beer_id.length !== 24) {
     return null
   }
 
-  return Beer.findOne({is_ok: 1, _id: id}).sort({crt_dt: -1})
+  return Beer.findOne({is_ok: 1, _id: beer_id}).sort({crt_dt: -1})
     .populate('brewery').exec((err, beer) => {
     if (err) {
       return null

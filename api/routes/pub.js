@@ -18,8 +18,8 @@ router.get('/', async (req, res, next) => {
   return next(errDetail)
 })
 
-router.get('/:id', async (req, res, next) => {
-  const results = await getPubDetail(req.params.id)
+router.get('/:pub_id', async (req, res, next) => {
+  const results = await getPubDetail(req.params.pub_id)
   if (results && typeof results !== 'undefined') {
     return res.send({
       code: 200,

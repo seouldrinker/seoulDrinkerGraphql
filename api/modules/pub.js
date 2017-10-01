@@ -31,12 +31,12 @@ export function getPubList (req) {
   })
 }
 
-export function getPubDetail (id) {
-  if (id.length !== 24) {
+export function getPubDetail (pub_id) {
+  if (pub_id.length !== 24) {
     return null
   }
 
-  return Pub.findOne({is_ok: 1, _id: id}).sort({crt_dt: -1})
+  return Pub.findOne({is_ok: 1, _id: pub_id}).sort({crt_dt: -1})
     .populate('brewery').exec((err, pub) => {
     if (err) {
       return null
