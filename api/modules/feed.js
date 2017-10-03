@@ -23,7 +23,7 @@ export async function getFeedList (req) {
     return feeds
   })
 
-  return _appendFeedImages(feeds)
+  return appendFeedImages(feeds)
 }
 
 
@@ -35,7 +35,7 @@ export async function getPubFeedList (pub_id) {
     }
     return feeds
   })
-  return _appendFeedImages(feeds)
+  return appendFeedImages(feeds)
 }
 
 
@@ -47,11 +47,11 @@ export async function getBeerFeedList (beer_id) {
     }
     return feeds
   })
-  return _appendFeedImages(feeds)
+  return appendFeedImages(feeds)
 }
 
 
-function _appendFeedImages (feeds) {
+export async function appendFeedImages (feeds) {
   return Promise.all(feeds.map(async (v, k) => {
     await FeedImage.find({is_ok: 1, feed: v._id}).sort({crt_dt: 1}).exec((err, feedImages) => {
       if (err) {

@@ -5,6 +5,8 @@ const Schema = mongoose.Schema
 export default mongoose.model('User', new Schema({
   id: String,
   platform: String,
+  picture: String,
+  _feeds: Array,
   is_ok: {
     type: Number,
     default: 1
