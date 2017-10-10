@@ -14,7 +14,7 @@ router.use('/', express.static(__dirname + '/../../'))
 router.use('/static', express.static(__dirname + '/../../images'))
 
 // [auth]
-router.use(checkAuth)
+// router.use(checkAuth)
 
 router.use('/seoulDrinkerApi/vbeta/feed', feed)
 router.use('/seoulDrinkerApi/vbeta/pub', pub)

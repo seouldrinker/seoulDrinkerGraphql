@@ -4,56 +4,71 @@ import Pub from '../models/pub'
 import User from '../models/user'
 import FeedImage from  '../models/feedImage'
 
-export async function getFeedList (req) {
-  let findFeeds = Feed.find({is_ok: 1}).sort({crt_dt: -1})
 
-  if (!req.query.type || req.query.type !== 'all') {
-    const page = (!req.query.page || req.query.page <= 0)
-      ? 1 : req.query.page
-    const count = (!req.query.count || req.query.count <= 0)
-      ? 20 : req.query.count
-    findFeeds = findFeeds.limit(Number(count)).skip((page-1) * count)
+function _appendFeedPager (models, query) {
+  if (!query.type || query.type !== 'all') {
+    const page = (!query.page || query.page <= 0)
+      ? 1 : query.page
+    const count = (!query.count || query.count <= 0)
+      ? 20 : query.count
+    return models.limit(Number(count)).skip((page-1) * count)
   }
+  return models
+}
 
-  const feeds = await findFeeds.populate(['beers', 'pub', 'user'])
+
+async function _appendFeedCounter (models, query) {
+  const count = await Feed.count({}, (err, count) => {
+    return count
+  })
+
+  return {
+    feedList: models,
+    totalPageCount: parseInt(count / (query.count || 20)) <= 0 ?
+      1 : parseInt(count / (query.count || 20))
+  }
+}
+
+
+async function _appendFeedExecuter (models, popArray, query) {
+  return await models.populate(popArray)
     .exec((err, feeds) => {
     if (err) {
       return null
     }
     return feeds
   })
-
-  return appendFeedImages(feeds)
 }
 
 
-export async function getPubFeedList (pub_id) {
-  const feeds = await Feed.find({is_ok: 1, pub: pub_id}).sort({crt_dt: -1})
-    .populate(['beers', 'pub', 'user']).exec((err, feeds) => {
-    if (err) {
-      return null
-    }
-    return feeds
-  })
-  return appendFeedImages(feeds)
+export async function getFeedList (req) {
+  const findFeeds = _appendFeedPager(Feed.find({is_ok: 1})
+    .sort({crt_dt: -1}), req.query)
+  const feeds = await _appendFeedExecuter(findFeeds, ['beers', 'pub', 'user'])
+  return await _appendFeedCounter(await appendFeedImages(feeds), req.query)
 }
 
 
-export async function getBeerFeedList (beer_id) {
-  const feeds = await Feed.find({is_ok: 1, beers: beer_id })
-  .sort({crt_dt: -1}).populate(['beers', 'pub', 'user']).exec((err, feeds) => {
-    if (err) {
-      return null
-    }
-    return feeds
-  })
-  return appendFeedImages(feeds)
+export async function getPubFeedList (pub_id, req) {
+  const findFeeds = _appendFeedPager(Feed.find({is_ok: 1, pub: pub_id})
+    .sort({crt_dt: -1}), req.query)
+  const feeds = await _appendFeedExecuter(findFeeds, ['beers', 'pub', 'user'])
+  return await _appendFeedCounter(await appendFeedImages(feeds), req.query)
+}
+
+
+export async function getBeerFeedList (beer_id, req) {
+  const findFeeds = _appendFeedPager(Feed.find({is_ok: 1, beers: beer_id })
+    .sort({crt_dt: -1}), req.query)
+  const feeds = await _appendFeedExecuter(findFeeds, ['beers', 'pub', 'user'])
+  return await _appendFeedCounter(await appendFeedImages(feeds), req.query)
 }
 
 
 export async function appendFeedImages (feeds) {
   return Promise.all(feeds.map(async (v, k) => {
-    await FeedImage.find({is_ok: 1, feed: v._id}).sort({crt_dt: 1}).exec((err, feedImages) => {
+    await FeedImage.find({is_ok: 1, feed: v._id}).sort({crt_dt: 1})
+      .exec((err, feedImages) => {
       if (err) {
         return null
       }

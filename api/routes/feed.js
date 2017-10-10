@@ -40,7 +40,7 @@ router.route('/').get(async (req, res, next) => {
 
 
 router.get('/pub/:pub_id', async (req, res, next) => {
-  const results = await getPubFeedList(req.params.pub_id)
+  const results = await getPubFeedList(req.params.pub_id, req)
 
   if (results && typeof results !== 'undefined') {
     return res.send({
@@ -55,7 +55,7 @@ router.get('/pub/:pub_id', async (req, res, next) => {
 
 
 router.get('/beer/:beer_id', async (req, res, next) => {
-  const results = await getBeerFeedList(req.params.beer_id)
+  const results = await getBeerFeedList(req.params.beer_id, req)
 
   if (results && typeof results !== 'undefined') {
     return res.send({
