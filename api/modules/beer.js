@@ -1,18 +1,18 @@
 import Beer from '../models/beer'
 import Brewery from '../models/brewery'
 
-function _filteredBeerList (name) {
+function _filteredBeerList (keyword) {
   let beerList = Beer.find({is_ok: 1})
-  if (name) {
+  if (keyword) {
     beerList = Beer.find({is_ok: 1, $or: [
       {
         eng_name: {
-          $regex: '.*' + name + '.*',
+          $regex: '.*' + keyword + '.*',
           $options: 'i'
         }
       }, {
         kor_name: {
-          $regex: '.*' + name + '.*',
+          $regex: '.*' + keyword + '.*',
           $options: 'i'
         }
       }
@@ -22,7 +22,7 @@ function _filteredBeerList (name) {
 }
 
 export function getBeerList (req) {
-  let findBeers = _filteredBeerList(req.query.name).sort({crt_dt: -1})
+  let findBeers = _filteredBeerList(req.query.keyword).sort({crt_dt: -1})
 
   if (!req.query.type || req.query.type !== 'all') {
     const page = (!req.query.page || req.query.page <= 0)
