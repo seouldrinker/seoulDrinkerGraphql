@@ -16,21 +16,7 @@ function _appendFeedPager (models, query) {
 }
 
 
-async function _appendFeedCounter (models, query) {
-  const count = await Feed.count({}, (err, count) => {
-    return count
-  })
-
-  return {
-    feedList: models,
-    currentPage: query.page || 1,
-    totalPage: parseInt(count / (query.count || 20)) <= 0 ?
-      1 : parseInt(count / (query.count || 20))
-  }
-}
-
-
-async function _appendFeedExecuter (models, popArray, query) {
+async function _appendFeedExecuter (models, popArray) {
   return await models.populate(popArray)
     .exec((err, feeds) => {
     if (err) {
@@ -38,6 +24,24 @@ async function _appendFeedExecuter (models, popArray, query) {
     }
     return feeds
   })
+}
+
+
+async function _appendFeedCounter (models, query) {
+  const count = await Feed.count({}, (err, count) => {
+    return count
+  })
+
+  const totalPage = parseInt(count / (query.count || 20)) <= 0 ?
+    0 : parseInt(count / (query.count || 20))
+  const lastPage = parseInt(count % (query.count || 20)) <= 0 ?
+    0 : 1
+
+  return {
+    feedList: models,
+    currentPage: query.page || 1,
+    totalPage: totalPage + lastPage
+  }
 }
 
 
