@@ -2,7 +2,6 @@ import Feed from '../models/feed'
 import Beer from '../models/beer'
 import Pub from '../models/pub'
 import User from '../models/user'
-import FeedImage from  '../models/feedImage'
 
 
 function _appendFeedPager (models, query) {
@@ -24,7 +23,8 @@ async function _appendFeedCounter (models, query) {
 
   return {
     feedList: models,
-    totalPageCount: parseInt(count / (query.count || 20)) <= 0 ?
+    currentPage: query.page || 1,
+    totalPage: parseInt(count / (query.count || 20)) <= 0 ?
       1 : parseInt(count / (query.count || 20))
   }
 }
@@ -45,7 +45,7 @@ export async function getFeedList (req) {
   const findFeeds = _appendFeedPager(Feed.find({is_ok: 1})
     .sort({crt_dt: -1}), req.query)
   const feeds = await _appendFeedExecuter(findFeeds, ['beers', 'pub', 'user'])
-  return await _appendFeedCounter(await appendFeedImages(feeds), req.query)
+  return await _appendFeedCounter(feeds, req.query)
 }
 
 
@@ -53,7 +53,7 @@ export async function getPubFeedList (pub_id, req) {
   const findFeeds = _appendFeedPager(Feed.find({is_ok: 1, pub: pub_id})
     .sort({crt_dt: -1}), req.query)
   const feeds = await _appendFeedExecuter(findFeeds, ['beers', 'pub', 'user'])
-  return await _appendFeedCounter(await appendFeedImages(feeds), req.query)
+  return await _appendFeedCounter(feeds, req.query)
 }
 
 
@@ -61,24 +61,17 @@ export async function getBeerFeedList (beer_id, req) {
   const findFeeds = _appendFeedPager(Feed.find({is_ok: 1, beers: beer_id })
     .sort({crt_dt: -1}), req.query)
   const feeds = await _appendFeedExecuter(findFeeds, ['beers', 'pub', 'user'])
-  return await _appendFeedCounter(await appendFeedImages(feeds), req.query)
+  return await _appendFeedCounter(feeds, req.query)
 }
 
 
-export async function appendFeedImages (feeds) {
-  return Promise.all(feeds.map(async (v, k) => {
-    await FeedImage.find({is_ok: 1, feed: v._id}).sort({crt_dt: 1})
-      .exec((err, feedImages) => {
-      if (err) {
-        return null
-      }
-      v._images = feedImages
-    })
-    return v
-  })).then(feeds => {
-    return feeds
-  })
+export async function getUserFeedList (user_id, req) {
+  const findFeeds = _appendFeedPager(Feed.find({is_ok: 1, user: user_id })
+    .sort({crt_dt: -1}), req.query)
+  const feeds = await _appendFeedExecuter(findFeeds, ['beers', 'pub', 'user'])
+  return await _appendFeedCounter(feeds, req.query)
 }
+
 
 /**
   NOTE: 피드 저장 (저장 전에 이미지들 부터 저장 후 진행)
@@ -111,11 +104,11 @@ export async function insertFeed (req) {
   newFeed.is_ok = 1
   newFeed.crt_dt = new Date()
   newFeed.udt_dt = newFeed.crt_dt
+  newFeed.image = req.files.feedImage
   const savedFeed = await newFeed.save((err, savedFeed) => {
     if (err) {
       return null
     }
-    _saveImages(req.files.feedImages, savedFeed._id)
     return savedFeed
   })
   return Feed.populate(savedFeed, [
@@ -130,38 +123,12 @@ export async function insertFeed (req) {
   })
 }
 
-function _saveImages (feedImages, feed_id) {
-  if (!feedImages) {
-    return null
-  }
-  return feedImages.map(async (v, k) => {
-    let newImage = new FeedImage()
-    newImage.feed = await Feed.findOne({is_ok: 1, _id: feed_id})
-    newImage.image = 'feeds/' + v.filename
-    newImage.is_ok = 1
-    newImage.crt_dt = new Date()
-    newImage.udt_dt = newImage.crt_dt
-    await newImage.save((err, image) => {
-      if (err) {
-        return null
-      }
-    })
-    return newImage
-  })
-}
-
 
 /**
   NOTE: 피드 수정
   TODO: (저장 전에 기존 이미지들 및 레퍼런스 삭제)
 **/
 export async function updateFeed (req) {
-  await FeedImage.updateMany({feed: req.params.feed_id},
-    {is_ok: 0, udt_dt: new Date()}).exec((err, feedImage) => {
-    if (err) {
-      return null
-    }
-  })
   return await Feed.updateOne({_id: req.params.feed_id}, {
     udt_dt: new Date(),
     context: req.body.context || '',
@@ -186,12 +153,12 @@ export async function updateFeed (req) {
         return null
       }
       return user
-    })
+    }),
+    image: req.files.feedImage
   }).populate(['beers', 'pub', 'user']).exec((err, feed) => {
     if (err) {
       return null
     }
-    _saveImages(req.files.feedImages, req.params.feed_id)
     return feed
   })
 }
@@ -201,31 +168,11 @@ export async function updateFeed (req) {
   NOTE: 피드 삭제 (삭제 전에 기존 이미지들 및 레퍼런스 삭제)
 **/
 export async function deleteFeed (feed_id) {
-  await FeedImage.updateMany({feed: feed_id}, {is_ok: 0, udt_dt: new Date()})
-    .exec((err, feedImage) => {
-    if (err) {
-      return null
-    }
-  })
   return await Feed.updateOne({_id: feed_id}, {is_ok: 0, udt_dt: new Date()})
     .exec((err, feed) => {
     if (err) {
       return null
     }
     return feed
-  })
-}
-
-
-/**
-  NOTE: 피드 이미지 삭제 (이미지만 지울 수 있도록)
-**/
-export function deleteFeedImage (feedImage_id) {
-  return FeedImage.updateOne({_id: feedImage_id}, {is_ok: 0, udt_dt: new Date()})
-    .exec((err, feedImage) => {
-    if (err) {
-      return null
-    }
-    return feedImage
   })
 }

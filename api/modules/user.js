@@ -3,9 +3,6 @@ import Badge from '../models/badge'
 import Feed from '../models/feed'
 import Beer from '../models/beer'
 import Pub from '../models/pub'
-import FeedImage from  '../models/feedImage'
-
-import { appendFeedImages } from './feed'
 
 export async function getUserDetail (user_id) {
   if (user_id.length !== 24) {
@@ -29,7 +26,7 @@ export async function getUserDetail (user_id) {
     return feeds
   })
 
-  user._feeds = await appendFeedImages(feeds)
+  user._feeds = feeds
 
   return user
 }
