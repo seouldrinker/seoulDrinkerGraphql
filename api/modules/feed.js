@@ -97,8 +97,8 @@ export async function insertFeed (req) {
     }
     return pub
   })
-  newFeed.user = await User.findOne({is_ok: 1,
-    id: req.query.id, platform: req.query.platform}).exec((err, user) => {
+  newFeed.user = await User.findOne({is_ok: 1, _id: req.body._id})
+    .exec((err, user) => {
     if (err) {
       return null
     }
@@ -108,18 +108,24 @@ export async function insertFeed (req) {
   newFeed.is_ok = 1
   newFeed.crt_dt = new Date()
   newFeed.udt_dt = newFeed.crt_dt
-  newFeed.image = req.files.feedImage
+  newFeed.image = `feeds/${req.file.filename}`
+
+  if (newFeed.beers === null
+    || newFeed.pub === null
+    || newFeed.user === null
+    || newFeed.context === null
+    || newFeed.image === null) {
+    return null
+  }
+
   const savedFeed = await newFeed.save((err, savedFeed) => {
     if (err) {
       return null
     }
     return savedFeed
   })
-  return Feed.populate(savedFeed, [
-    {path: 'beers', model: 'Beer'},
-    {path: 'pub', model: 'Pub'},
-    {path: 'user', model: 'User'}
-  ], (err, feed) => {
+
+  return Feed.populate(savedFeed, ['beers', 'pub', 'user'], (err, feed) => {
     if (err) {
       return null
     }
@@ -152,13 +158,13 @@ export async function updateFeed (req) {
       return pub
     }),
     user: await User.findOne({is_ok: 1,
-      id: req.query.id, platform: req.query.platform}).exec((err, user) => {
+      id: req.body.id, platform: req.body.platform}).exec((err, user) => {
       if (err) {
         return null
       }
       return user
     }),
-    image: req.files.feedImage
+    image: req.file.feedImage
   }).populate(['beers', 'pub', 'user']).exec((err, feed) => {
     if (err) {
       return null

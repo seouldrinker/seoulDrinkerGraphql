@@ -4,9 +4,6 @@ import multer from 'multer'
   NOTE: 이미지 업로드
 **/
 export function imageUpload (req, res, next) {
-  let mapCounter = 0
-  let imageCounter = 0
-
   const upload = multer({
     storage: multer.diskStorage({
       destination: function (req, file, cb) {
@@ -18,9 +15,7 @@ export function imageUpload (req, res, next) {
           + '.' + file.mimetype.split('/')[1])
       }
     })
-  }).fields([
-    { name: 'feedImage', maxCount: 1 }
-  ])
+  }).single('feedImage')
 
   upload(req, res, function (err) {
     if (!err) {
