@@ -72,7 +72,10 @@ async function _appendPubCounter (models, query) {
 export async function getPubList (req) {
   const findPubsCondition = _filteredPubList(req.query.keyword).sort({crt_dt: -1})
   const findPubs = _appendPubPager(findPubsCondition, req.query)
-  const pubs = await _appendPubExecuter(findPubs, [])
+  const pubs = await _appendPubExecuter(findPubs, [{
+    path: 'brewery',
+    model: 'Brewery'
+  }])
   return await _appendPubCounter(pubs, req.query)
 }
 
