@@ -11,6 +11,7 @@ export default mongoose.model('Beer', new Schema({
   feature: String,
   style: String,
   release: String,
+  feedList: Array,
   is_ok: {
     type: Number,
     default: 1

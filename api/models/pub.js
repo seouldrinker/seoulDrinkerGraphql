@@ -8,6 +8,7 @@ export default mongoose.model('Pub', new Schema({
   eng_name: String,
   location: String,
   phone: String,
+  feedList: Array,
   is_ok: {
     type: Number,
     default: 1

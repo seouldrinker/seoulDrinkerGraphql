@@ -1,4 +1,5 @@
 import Beer from '../models/beer'
+import Feed from '../models/feed'
 import Brewery from '../models/brewery'
 
 
@@ -57,7 +58,7 @@ async function _appendBeerCounter (models, query) {
     0 : 1
 
   return {
-    beerList: models,
+    beerList: await Promise.all(models),
     currentPage: query.page || 1,
     totalPage: totalPage + lastPage
   }
@@ -68,20 +69,44 @@ export async function getBeerList (req) {
   const findBeersCondition = _filteredBeerList(req.query.keyword).sort({crt_dt: -1})
   const findBeers = _appendBeerPager(findBeersCondition, req.query)
   const beers = await _appendBeerExecuter(findBeers, [])
-  return await _appendBeerCounter(beers, req.query)
+
+  const appendedFeedBeers = await beers.map(async beer => {
+    beer.feedList = await Feed.find({is_ok: 1, beers: {
+      $in: [beer._id]
+    }}).exec((err, feeds) => {
+      if (err) {
+        return null
+      }
+      return feeds
+    })
+    return beer
+  })
+
+  return await _appendBeerCounter(appendedFeedBeers, req.query)
 }
 
 
-export function getBeerDetail (beer_id) {
+export async function getBeerDetail (beer_id) {
   if (beer_id.length !== 24) {
     return null
   }
 
-  return Beer.findOne({is_ok: 1, _id: beer_id}).sort({crt_dt: -1})
+  const beer = await Beer.findOne({is_ok: 1, _id: beer_id}).sort({crt_dt: -1})
     .populate('brewery').exec((err, beer) => {
     if (err) {
       return null
     }
     return beer
   })
+
+  beer.feedList = await Feed.find({is_ok: 1, beers: {
+    $in: [beer_id]
+  }}).exec((err, feed) => {
+    if (err) {
+      return null
+    }
+    return feed
+  })
+
+  return beer
 }

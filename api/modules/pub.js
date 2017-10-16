@@ -1,4 +1,5 @@
 import Pub from '../models/pub'
+import Feed from '../models/feed'
 import Brewery from '../models/brewery'
 
 
@@ -62,7 +63,7 @@ async function _appendPubCounter (models, query) {
     0 : 1
 
   return {
-    pubList: models,
+    pubList: await Promise.all(models),
     currentPage: query.page || 1,
     totalPage: totalPage + lastPage
   }
@@ -72,24 +73,44 @@ async function _appendPubCounter (models, query) {
 export async function getPubList (req) {
   const findPubsCondition = _filteredPubList(req.query.keyword).sort({crt_dt: -1})
   const findPubs = _appendPubPager(findPubsCondition, req.query)
-  const pubs = await _appendPubExecuter(findPubs, [{
+  let pubs = await _appendPubExecuter(findPubs, [{
     path: 'brewery',
     model: 'Brewery'
   }])
-  return await _appendPubCounter(pubs, req.query)
+
+  const appendedFeedPubs = await pubs.map(async pub => {
+    pub.feedList = await Feed.find({is_ok: 1, pub: pub._id}).exec((err, feeds) => {
+      if (err) {
+        return null
+      }
+      return feeds
+    })
+    return await pub
+  })
+
+  return await _appendPubCounter(appendedFeedPubs, req.query)
 }
 
 
-export function getPubDetail (pub_id) {
+export async function getPubDetail (pub_id) {
   if (pub_id.length !== 24) {
     return null
   }
 
-  return Pub.findOne({is_ok: 1, _id: pub_id}).sort({crt_dt: -1})
+  const pub = await Pub.findOne({is_ok: 1, _id: pub_id}).sort({crt_dt: -1})
     .populate('brewery').exec((err, pub) => {
     if (err) {
       return null
     }
     return pub
   })
+
+  pub.feedList = await Feed.find({is_ok: 1, pub: pub_id}).exec((err, feed) => {
+    if (err) {
+      return null
+    }
+    return feed
+  })
+
+  return pub
 }
