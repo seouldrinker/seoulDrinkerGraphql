@@ -47,7 +47,7 @@ async function _appendBeerExecuter (models, popArray) {
 }
 
 
-async function _appendBeerCounter (models, query) {
+async function _appendBeerPageCounter (models, query) {
   const count = await Beer.count({}, (err, count) => {
     return count
   })
@@ -58,7 +58,7 @@ async function _appendBeerCounter (models, query) {
     0 : 1
 
   return {
-    beerList: await Promise.all(models),
+    beerList: await models,
     currentPage: query.page || 1,
     totalPage: totalPage + lastPage
   }
@@ -70,7 +70,19 @@ export async function getBeerList (req) {
   const findBeers = _appendBeerPager(findBeersCondition, req.query)
   const beers = await _appendBeerExecuter(findBeers, [])
 
-  const appendedFeedBeers = await beers.map(async beer => {
+  return await _appendBeerPageCounter(beers, req.query)
+}
+
+
+/*
+* DEPLICATED: Fail to SYNC about Beer and Feed join.
+*/
+export async function getBeerFeedList (req) {
+  const findBeersCondition = _filteredBeerList(req.query.keyword).sort({crt_dt: -1})
+  const findBeers = _appendBeerPager(findBeersCondition, req.query)
+  const beers = await _appendBeerExecuter(findBeers, [])
+
+  beers.map(async beer => {
     beer.feedList = await Feed.find({is_ok: 1, beers: {
       $in: [beer._id]
     }}).exec((err, feeds) => {
@@ -82,7 +94,7 @@ export async function getBeerList (req) {
     return beer
   })
 
-  return await _appendBeerCounter(appendedFeedBeers, req.query)
+  return await _appendBeerPageCounter(Promise.all(beers), req.query)
 }
 
 
