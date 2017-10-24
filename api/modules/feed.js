@@ -139,7 +139,7 @@ export async function insertFeed (req) {
   TODO: (저장 전에 기존 이미지들 및 레퍼런스 삭제)
 **/
 export async function updateFeed (req) {
-  return await Feed.updateOne({_id: req.params.feed_id}, {
+  let datas = {
     udt_dt: new Date(),
     context: req.body.context || '',
     beers: await Beer.find({is_ok: 1, _id: {
@@ -157,15 +157,21 @@ export async function updateFeed (req) {
       }
       return pub
     }),
-    user: await User.findOne({is_ok: 1,
-      id: req.body.id, platform: req.body.platform}).exec((err, user) => {
+    user: await User.findOne({is_ok: 1, _id: req.body._id})
+      .exec((err, user) => {
       if (err) {
         return null
       }
       return user
     }),
-    image: req.file.feedImage
-  }).populate(['beers', 'pub', 'user']).exec((err, feed) => {
+  }
+
+  if (req.file && req.file.fieldname === 'feedImage') {
+    datas.image = `feeds/${req.file.filename}`
+  }
+
+  return await Feed.updateOne({_id: req.params.feed_id}, datas)
+    .populate(['beers', 'pub', 'user']).exec((err, feed) => {
     if (err) {
       return null
     }
