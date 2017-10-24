@@ -2,6 +2,7 @@ import Beer from '../models/beer'
 import Feed from '../models/feed'
 import Brewery from '../models/brewery'
 
+const SOMEWHERE_BEER = '59ec88dc32cb539aa68cca1d'
 
 function _filteredBeerList (keyword) {
   let beerList = Beer.find({is_ok: 1})
@@ -70,7 +71,49 @@ export async function getBeerList (req) {
   const findBeers = _appendBeerPager(findBeersCondition, req.query)
   const beers = await _appendBeerExecuter(findBeers, [])
 
+  // 어딘가 펍 최상단으로 이동.
+  const somewhereBeerIndex = beers.findIndex(beer => {
+    return beer._id.toString() === SOMEWHERE_BEER
+  })
+  const somewhereBeer = beers[somewhereBeerIndex]
+  beers.splice(somewhereBeerIndex, 1)
+  beers.unshift(somewhereBeer)
+
   return await _appendBeerPageCounter(beers, req.query)
+}
+
+
+export async function getBeerRankList (req) {
+  const findBeers = Beer.find({is_ok: 1})
+  const findFeeds = Feed.find({is_ok: 1})
+  let beers = await _appendBeerExecuter(findBeers, ['brewery'])
+  let feeds = await _appendBeerExecuter(findFeeds, ['pub', 'beers'])
+
+  beers.map(beer => {
+    beer._feedCount = 0
+    feeds.map(feed => {
+      feed.beers.map(feedBeer => {
+        if (beer._id.toString() === feedBeer._id.toString()) {
+          beer._feedCount++
+          beer._feedList.push(feed)
+        }
+      })
+    })
+  })
+
+  beers.sort((a, b) => {
+    return b._feedCount - a._feedCount
+  })
+
+  let rankedBeer = []
+  beers.map((v, k) => {
+    rankedBeer[k] = {
+      beer: v,
+      rank: (v._feedCount === 0) ? 0 : k + 1
+    }
+  })
+
+  return rankedBeer
 }
 
 
@@ -83,7 +126,7 @@ export async function getBeerFeedList (req) {
   const beers = await _appendBeerExecuter(findBeers, [])
 
   beers.map(async beer => {
-    beer.feedList = await Feed.find({is_ok: 1, beers: {
+    beer._feedList = await Feed.find({is_ok: 1, beers: {
       $in: [beer._id]
     }}).exec((err, feeds) => {
       if (err) {
@@ -111,7 +154,7 @@ export async function getBeerDetail (beer_id) {
     return beer
   })
 
-  beer.feedList = await Feed.find({is_ok: 1, beers: {
+  beer._feedList = await Feed.find({is_ok: 1, beers: {
     $in: [beer_id]
   }}).exec((err, feed) => {
     if (err) {

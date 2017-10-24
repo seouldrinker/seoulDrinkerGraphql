@@ -2,6 +2,7 @@ import Pub from '../models/pub'
 import Feed from '../models/feed'
 import Brewery from '../models/brewery'
 
+const SOMEWHERE_PUB = '59ec86ae32cb539aa68cca0e'
 
 function _filteredPubList (keyword) {
   let pubList = Pub.find({is_ok: 1})
@@ -78,7 +79,47 @@ export async function getPubList (req) {
     model: 'Brewery'
   }])
 
+  // 어딘가 펍 최상단으로 이동.
+  const somewherePubIndex = pubs.findIndex(pub => {
+    return pub._id.toString() === SOMEWHERE_PUB
+  })
+  const somewherePub = pubs[somewherePubIndex]
+  pubs.splice(somewherePubIndex, 1)
+  pubs.unshift(somewherePub)
+
   return await _appendPubPageCounter(pubs, req.query)
+}
+
+
+export async function getPubRankList (req) {
+  const findPubs = Pub.find({is_ok: 1})
+  const findFeeds = Feed.find({is_ok: 1})
+  let pubs = await _appendPubExecuter(findPubs, ['brewery'])
+  let feeds = await _appendPubExecuter(findFeeds, ['pub', 'beers'])
+
+  pubs.map(pub => {
+    pub._feedCount = 0
+    feeds.map(feed => {
+      if (pub._id.toString() === feed.pub._id.toString()) {
+        pub._feedCount++
+        pub._feedList.push(feed)
+      }
+    })
+  })
+
+  pubs.sort((a, b) => {
+    return b._feedCount - a._feedCount
+  })
+
+  let rankedPub = []
+  pubs.map((v, k) => {
+    rankedPub[k] = {
+      pub: v,
+      rank: (v._feedCount === 0) ? 0 : k + 1
+    }
+  })
+
+  return rankedPub
 }
 
 
@@ -94,7 +135,7 @@ export async function getPubFeedList (req) {
   }])
 
   pubs.map(async pub => {
-    pub.feedList = await Feed.find({is_ok: 1, pub: pub._id}).exec((err, feeds) => {
+    pub._feedList = await Feed.find({is_ok: 1, pub: pub._id}).exec((err, feeds) => {
       if (err) {
         return null
       }
@@ -120,7 +161,7 @@ export async function getPubDetail (pub_id) {
     return pub
   })
 
-  pub.feedList = await Feed.find({is_ok: 1, pub: pub_id}).exec((err, feed) => {
+  pub._feedList = await Feed.find({is_ok: 1, pub: pub_id}).exec((err, feed) => {
     if (err) {
       return null
     }
