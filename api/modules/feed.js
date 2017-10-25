@@ -69,14 +69,6 @@ export async function getBeerFeedList (beer_id, req) {
 }
 
 
-export async function getUserFeedList (user_id, req) {
-  const findFeeds = _appendFeedPager(Feed.find({is_ok: 1, user: user_id })
-    .sort({crt_dt: -1}), req.query)
-  const feeds = await _appendFeedExecuter(findFeeds, ['beers', 'pub', 'user'])
-  return await _appendFeedCounter(feeds, req.query)
-}
-
-
 /**
   NOTE: 피드 저장 (저장 전에 이미지들 부터 저장 후 진행)
 **/
