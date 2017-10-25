@@ -69,20 +69,6 @@ router.get('/beer/:beer_id', async (req, res, next) => {
   return next(errDetail)
 })
 
-router.get('/user/:user_id', async (req, res, next) => {
-  const results = await getUserFeedList(req.params.user_id, req)
-
-  if (results && typeof results !== 'undefined') {
-    return res.send({
-      code: 200,
-      results
-    })
-  }
-  let errDetail = new Error('Database failure.')
-  errDetail.status = 500
-  return next(errDetail)
-})
-
 
 router.route('/:feed_id').put(imageUpload, async (req, res, next) => {
   const results = await updateFeed(req)
