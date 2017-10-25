@@ -86,7 +86,7 @@ export async function getBeerRankList (req) {
       }
     })
 
-    req.session.getBeerRankList = getBeerRankList
+    req.session.getBeerRankList = rankedBeer
   }
 
   return req.session.getBeerRankList
