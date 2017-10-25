@@ -30,18 +30,6 @@ function _filteredPubList (keyword) {
 }
 
 
-function _appendPubPager (models, query) {
-  if (!query.type || query.type !== 'all') {
-    const page = (!query.page || query.page <= 0)
-      ? 1 : query.page
-    const count = (!query.count || query.count <= 0)
-      ? 20 : query.count
-    return models.limit(Number(count)).skip((page-1) * count)
-  }
-  return models
-}
-
-
 async function _appendPubExecuter (models, popArray) {
   return await models.populate(popArray)
     .exec((err, pubs) => {
@@ -53,73 +41,62 @@ async function _appendPubExecuter (models, popArray) {
 }
 
 
-async function _appendPubPageCounter (models, query) {
-  const count = await Pub.count({}, (err, count) => {
-    return count
-  })
-
-  const totalPage = parseInt(count / (query.count || 20)) <= 0 ?
-    0 : parseInt(count / (query.count || 20))
-  const lastPage = parseInt(count % (query.count || 20)) <= 0 ?
-    0 : 1
-
-  return {
-    pubList: await models,
-    currentPage: query.page || 1,
-    totalPage: totalPage + lastPage
-  }
-}
-
-
 export async function getPubList (req) {
-  const findPubsCondition = _filteredPubList(req.query.keyword).sort({crt_dt: -1})
-  const findPubs = _appendPubPager(findPubsCondition, req.query)
-  const pubs = await _appendPubExecuter(findPubs, [{
-    path: 'brewery',
-    model: 'Brewery'
-  }])
+  if (!req.session.getPubList) {
+    const findPubs = _filteredPubList(req.query.keyword).sort({crt_dt: -1})
+    const pubs = await _appendPubExecuter(findPubs, [{
+      path: 'brewery',
+      model: 'Brewery'
+    }])
 
-  // 어딘가 펍 최상단으로 이동.
-  const somewherePubIndex = pubs.findIndex(pub => {
-    return pub._id.toString() === SOMEWHERE_PUB
-  })
-  const somewherePub = pubs[somewherePubIndex]
-  pubs.splice(somewherePubIndex, 1)
-  pubs.unshift(somewherePub)
+    // 어딘가 펍 최상단으로 이동.
+    const somewherePubIndex = pubs.findIndex(pub => {
+      return pub._id.toString() === SOMEWHERE_PUB
+    })
+    const somewherePub = pubs[somewherePubIndex]
+    pubs.splice(somewherePubIndex, 1)
+    pubs.unshift(somewherePub)
 
-  return await _appendPubPageCounter(pubs, req.query)
+    req.session.getPubList = pubs
+  }
+
+  return req.session.getPubList
 }
 
 
 export async function getPubRankList (req) {
-  const findPubs = Pub.find({is_ok: 1})
-  const findFeeds = Feed.find({is_ok: 1})
-  let pubs = await _appendPubExecuter(findPubs, ['brewery'])
-  let feeds = await _appendPubExecuter(findFeeds, ['pub', 'beers'])
+  if (!req.session.getPubRankList) {
+    const findPubs = Pub.find({is_ok: 1})
+    const findFeeds = Feed.find({is_ok: 1})
+    let pubs = await _appendPubExecuter(findPubs, ['brewery'])
+    let feeds = await _appendPubExecuter(findFeeds, ['pub', 'beers'])
 
-  pubs.map(pub => {
-    pub._feedCount = 0
-    feeds.map(feed => {
-      if (pub._id.toString() === feed.pub._id.toString()) {
-        pub._feedCount++
-        pub._feedList.push(feed)
+    pubs.map(pub => {
+      pub._feedCount = 0
+      feeds.map(feed => {
+        if (pub._id.toString() === feed.pub._id.toString()) {
+          pub._feedCount++
+          pub._feedList.push(feed)
+        }
+      })
+    })
+
+    pubs.sort((a, b) => {
+      return b._feedCount - a._feedCount
+    })
+
+    let rankedPub = []
+    pubs.map((v, k) => {
+      rankedPub[k] = {
+        pub: v,
+        rank: (v._feedCount === 0) ? 0 : k + 1
       }
     })
-  })
 
-  pubs.sort((a, b) => {
-    return b._feedCount - a._feedCount
-  })
+    req.session.getPubRankList = rankedPub
+  }
 
-  let rankedPub = []
-  pubs.map((v, k) => {
-    rankedPub[k] = {
-      pub: v,
-      rank: (v._feedCount === 0) ? 0 : k + 1
-    }
-  })
-
-  return rankedPub
+  return req.session.getPubRankList
 }
 
 
@@ -127,8 +104,7 @@ export async function getPubRankList (req) {
 * DEPLICATED: Fail to SYNC about Pub and Feed join.
 */
 export async function getPubFeedList (req) {
-  const findPubsCondition = _filteredPubList(req.query.keyword).sort({crt_dt: -1})
-  const findPubs = _appendPubPager(findPubsCondition, req.query)
+  const findPubs = _filteredPubList(req.query.keyword).sort({crt_dt: -1})
   let pubs = await _appendPubExecuter(findPubs, [{
     path: 'brewery',
     model: 'Brewery'
@@ -144,7 +120,7 @@ export async function getPubFeedList (req) {
     return await pub
   })
 
-  return await _appendPubPageCounter(Promise.all(pubs), req.query)
+  return await Promise.all(pubs)
 }
 
 
