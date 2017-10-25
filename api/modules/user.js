@@ -94,7 +94,7 @@ export async function getUserDetail (user_id) {
   })
 
   const feeds = await Feed.find({is_ok: 1, user: user._id}).sort({crt_dt: -1})
-    .populate(['beers', 'pub'])
+    .populate(['beers', 'pub', 'user'])
     .exec((err, feeds) => {
     if (err) {
       return null
