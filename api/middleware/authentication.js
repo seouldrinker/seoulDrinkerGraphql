@@ -69,38 +69,41 @@ function _commonAuth(next, url, query, includeToken, headers) {
   TODO: DB에 등록된 유저인지 체크하고, 안되어있으면 추가
   NOTE: **DEPLICATED** 서버에서 저장할 일이 아님.
 **/
-// export function checkRegister (req, res, next) {
-//   let errDetail = new Error('Database failure.')
-//   errDetail.status = 500
-//
-//   if (!req.query || !req.query.id || !req.query.platform) {
-//     let errDetail = new Error('You didn\'t have authentication.')
-//     errDetail.status = 401
-//     return next(errDetail)
-//   }
-//
-//   User.findOne({'id': req.query.id, 'platform': req.query.platform})
-//     .exec((err, user) => {
-//     if (err) {
-//       return next(errDetail)
-//     }
-//
-//     if (!user) {
-//       let newUser = new User()
-//       newUser.id = req.query.id
-//       newUser.platform = req.query.platform
-//       newUser.is_ok = 1
-//       newUser.crt_dt = new Date()
-//       newUser.udt_dt = newUser.crt_dt
-//       newUser.save((err, user) => {
-//         if (err) {
-//           return next(errDetail)
-//         }
-//       })
-//     }
-//   }).then(save => {
-//     return next()
-//   }).catch(e => {
-//     return next(errDetail)
-//   })
-// }
+export function checkRegister (req, res, next) {
+  let errDetail = new Error('Database failure.')
+  errDetail.status = 500
+
+  if (!req.query || !req.query.id || !req.query.platform) {
+    let errDetail = new Error('You didn\'t have authentication.')
+    errDetail.status = 401
+    return next(errDetail)
+  }
+
+  User.findOne({'id': req.query.id, 'platform': req.query.platform})
+    .exec((err, user) => {
+    if (err) {
+      return next(errDetail)
+    }
+
+    if (!user) {
+      let newUser = new User()
+      newUser.id = req.query.id
+      newUser.platform = req.query.platform
+      newUser.email = req.query.email
+      newUser.name = req.query.name
+      newUser.picture = req.query.picture
+      newUser.is_ok = 1
+      newUser.crt_dt = new Date()
+      newUser.udt_dt = newUser.crt_dt
+      newUser.save((err, user) => {
+        if (err) {
+          return next(errDetail)
+        }
+      })
+    }
+  }).then(save => {
+    return next()
+  }).catch(e => {
+    return next(errDetail)
+  })
+}
