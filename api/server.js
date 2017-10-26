@@ -16,7 +16,7 @@ import { DB_URL, SESSION_SECRET } from './config'
 
 const app = express()
 const router = express.Router()
-const port = 3000
+const port = 8002
 
 // [DB Config]
 const MongoStore = connectMongo(session)
