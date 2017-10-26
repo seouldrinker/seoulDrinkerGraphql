@@ -35,6 +35,7 @@ app.use(morgan('combined', {
 }))
 app.use(session({
   secret: SESSION_SECRET,
+  cookie: { maxAge: 1000 },
   resave: false,
   saveUninitialized: true,
   store: new MongoStore({ mongooseConnection: mongoose.connection }),
