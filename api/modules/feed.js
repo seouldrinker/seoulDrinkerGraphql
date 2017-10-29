@@ -131,6 +131,8 @@ export async function insertFeed (req) {
   TODO: (저장 전에 기존 이미지들 및 레퍼런스 삭제)
 **/
 export async function updateFeed (req) {
+  const feed_id = req.params.feed_id
+
   let datas = {
     udt_dt: new Date(),
     context: req.body.context || '',
@@ -162,7 +164,14 @@ export async function updateFeed (req) {
     datas.image = `feeds/${req.file.filename}`
   }
 
-  return await Feed.updateOne({_id: req.params.feed_id}, datas)
+  await Feed.updateOne({_id: feed_id}, datas).exec(async (err, feed) => {
+    if (err) {
+      return null
+    }
+    return feed
+  })
+
+  return await Feed.findOne({is_ok: 1, _id: feed_id})
     .populate(['beers', 'pub', 'user']).exec((err, feed) => {
     if (err) {
       return null
