@@ -43,7 +43,7 @@ async function _appendPubExecuter (models, popArray) {
 
 export async function getPubList (req) {
   if (!req.session.getPubList) {
-    const findPubs = _filteredPubList(req.query.keyword).sort({crt_dt: -1})
+    const findPubs = _filteredPubList(req.query.keyword).sort({eng_name: 1})
     const pubs = await _appendPubExecuter(findPubs, [{
       path: 'brewery',
       model: 'Brewery'

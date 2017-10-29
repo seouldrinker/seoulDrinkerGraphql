@@ -38,7 +38,7 @@ async function _appendBeerExecuter (models, popArray) {
 
 export async function getBeerList (req) {
   if (!req.session.getBeerList) {
-    const findBeers = _filteredBeerList(req.query.keyword).sort({crt_dt: -1})
+    const findBeers = _filteredBeerList(req.query.keyword).sort({eng_name: 1})
     const beers = await _appendBeerExecuter(findBeers, [])
 
     // 어딘가 펍 최상단으로 이동.
