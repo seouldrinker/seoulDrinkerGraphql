@@ -26,3 +26,27 @@ export function imageUpload (req, res, next) {
     return next(errDetail)
   })
 }
+
+export function profileUpload (req, res, next) {
+  const upload = multer({
+    storage: multer.diskStorage({
+      destination: function (req, file, cb) {
+        cb(null, 'images/users/')
+      },
+      filename: function (req, file, cb) {
+        const currentDate = new Date()
+        cb(null, file.fieldname + '_' + currentDate.getTime()
+          + '.' + file.mimetype.split('/')[1])
+      }
+    })
+  }).single('profile')
+
+  upload(req, res, function (err) {
+    if (!err) {
+      return next()
+    }
+    let errDetail = new Error('Image save failure.')
+    errDetail.status = 500
+    return next(errDetail)
+  })
+}

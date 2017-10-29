@@ -80,6 +80,21 @@ export async function addUser (req) {
   })
 }
 
+export function updateProfile (req) {
+  let picture = ''
+  if (req.file && req.file.fieldname === 'profile') {
+    picture = `users/${req.file.filename}`
+  }
+
+  return User.updateOne({_id: req.params.user_id}, { picture })
+    .exec((err, user) => {
+    if (err) {
+      return null
+    }
+    return user
+  })
+}
+
 export async function getUserDetail (user_id) {
   if (user_id.length !== 24) {
     return null
