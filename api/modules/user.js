@@ -49,35 +49,35 @@ export async function addUser (req) {
     picture = req.query.picture
   }
 
-  return User.findOne({'id': id, 'platform': platform})
-    .exec((err, user) => {
+  const user = await User.findOne({'id': id, 'platform': platform})
+    .exec(async (err, user) => {
     if (err) {
       return null
     }
-
-    if (!user) {
-      let newUser = new User()
-      newUser.id = id
-      newUser.platform = platform
-      newUser.email = email
-      newUser.name = name
-      newUser.picture = picture
-      newUser.is_ok = 1
-      newUser.crt_dt = new Date()
-      newUser.udt_dt = newUser.crt_dt
-      newUser.save((err, savedUser) => {
-        if (err) {
-          return null
-        }
-        return savedUser
-      }).catch(e => {
-        return null
-      })
-    }
-    return user
   }).catch(e => {
     return null
   })
+
+  if (!user) {
+    let newUser = new User()
+    newUser.id = id
+    newUser.platform = platform
+    newUser.email = email
+    newUser.name = name
+    newUser.picture = picture
+    newUser.is_ok = 1
+    newUser.crt_dt = new Date()
+    newUser.udt_dt = newUser.crt_dt
+    return await newUser.save((err, savedUser) => {
+      if (err) {
+        return null
+      }
+      return savedUser
+    }).catch(e => {
+      return null
+    })
+  }
+  return user
 }
 
 export function updateProfile (req) {
