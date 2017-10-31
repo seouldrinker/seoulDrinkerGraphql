@@ -37,21 +37,18 @@ async function _appendBeerExecuter (models, popArray) {
 
 
 export async function getBeerList (req) {
-  if (!req.session.getBeerList) {
-    const findBeers = _filteredBeerList(req.query.keyword).sort({kor_name: 1})
-    const beers = await _appendBeerExecuter(findBeers, [])
+  const findBeers = _filteredBeerList(req.query.keyword).sort({kor_name: 1})
+  const beers = await _appendBeerExecuter(findBeers, [])
 
-    // 어딘가 펍 최상단으로 이동.
-    const somewhereBeerIndex = beers.findIndex(beer => {
-      return beer._id.toString() === SOMEWHERE_BEER
-    })
-    const somewhereBeer = beers[somewhereBeerIndex]
-    beers.splice(somewhereBeerIndex, 1)
-    beers.unshift(somewhereBeer)
+  // 어딘가 펍 최상단으로 이동.
+  const somewhereBeerIndex = beers.findIndex(beer => {
+    return beer._id.toString() === SOMEWHERE_BEER
+  })
+  const somewhereBeer = beers[somewhereBeerIndex]
+  beers.splice(somewhereBeerIndex, 1)
+  beers.unshift(somewhereBeer)
 
-    req.session.getBeerList = beers
-  }
-  return req.session.getBeerList
+  return beers
 }
 
 

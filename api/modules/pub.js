@@ -42,25 +42,21 @@ async function _appendPubExecuter (models, popArray) {
 
 
 export async function getPubList (req) {
-  if (!req.session.getPubList) {
-    const findPubs = _filteredPubList(req.query.keyword).sort({kor_name: 1})
-    const pubs = await _appendPubExecuter(findPubs, [{
-      path: 'brewery',
-      model: 'Brewery'
-    }])
+  const findPubs = _filteredPubList(req.query.keyword).sort({kor_name: 1})
+  const pubs = await _appendPubExecuter(findPubs, [{
+    path: 'brewery',
+    model: 'Brewery'
+  }])
 
-    // 어딘가 펍 최상단으로 이동.
-    const somewherePubIndex = pubs.findIndex(pub => {
-      return pub._id.toString() === SOMEWHERE_PUB
-    })
-    const somewherePub = pubs[somewherePubIndex]
-    pubs.splice(somewherePubIndex, 1)
-    pubs.unshift(somewherePub)
+  // 어딘가 펍 최상단으로 이동.
+  const somewherePubIndex = pubs.findIndex(pub => {
+    return pub._id.toString() === SOMEWHERE_PUB
+  })
+  const somewherePub = pubs[somewherePubIndex]
+  pubs.splice(somewherePubIndex, 1)
+  pubs.unshift(somewherePub)
 
-    req.session.getPubList = pubs
-  }
-
-  return req.session.getPubList
+  return pubs
 }
 
 
