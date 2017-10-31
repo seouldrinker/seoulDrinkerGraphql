@@ -4,31 +4,6 @@ import Brewery from '../models/brewery'
 
 const SOMEWHERE_PUB = '59ec86ae32cb539aa68cca0e'
 
-function _filteredPubList (keyword) {
-  let pubList = Pub.find({is_ok: 1})
-  if (keyword) {
-    pubList = Pub.find({is_ok: 1, $or: [
-      {
-        eng_name: {
-          $regex: '.*' + keyword + '.*',
-          $options: 'i'
-        }
-      }, {
-        kor_name: {
-          $regex: '.*' + keyword + '.*',
-          $options: 'i'
-        }
-      }, {
-        location: {
-          $regex: '.*' + keyword + '.*',
-          $options: 'i'
-        }
-      }
-    ]})
-  }
-  return pubList
-}
-
 
 async function _appendPubExecuter (models, popArray) {
   return await models.populate(popArray)
@@ -42,7 +17,7 @@ async function _appendPubExecuter (models, popArray) {
 
 
 export async function getPubList (req) {
-  const findPubs = _filteredPubList(req.query.keyword).sort({kor_name: 1})
+  const findPubs = Pub.find({is_ok: 1}).sort({kor_name: 1})
   const pubs = await _appendPubExecuter(findPubs, [{
     path: 'brewery',
     model: 'Brewery'
@@ -56,6 +31,14 @@ export async function getPubList (req) {
   pubs.splice(somewherePubIndex, 1)
   pubs.unshift(somewherePub)
 
+  if (req.query && req.query.keyword) {
+    const newPubs = Object.assign([], pubs)
+    const tempPubs = newPubs.filter(pub => {
+      return pub.eng_name.toUpperCase().indexOf(req.query.keyword.toUpperCase()) >= 0
+        || pub.kor_name.toUpperCase().indexOf(req.query.keyword.toUpperCase()) >= 0
+    })
+    return tempPubs
+  }
   return pubs
 }
 
@@ -93,30 +76,6 @@ export async function getPubRankList (req) {
   }
 
   return req.session.getPubRankList
-}
-
-
-/*
-* DEPLICATED: Fail to SYNC about Pub and Feed join.
-*/
-export async function getPubFeedList (req) {
-  const findPubs = _filteredPubList(req.query.keyword).sort({crt_dt: -1})
-  let pubs = await _appendPubExecuter(findPubs, [{
-    path: 'brewery',
-    model: 'Brewery'
-  }])
-
-  pubs.map(async pub => {
-    pub._feedList = await Feed.find({is_ok: 1, pub: pub._id}).exec((err, feeds) => {
-      if (err) {
-        return null
-      }
-      return feeds
-    })
-    return await pub
-  })
-
-  return await Promise.all(pubs)
 }
 
 
