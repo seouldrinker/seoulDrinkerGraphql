@@ -42,13 +42,15 @@ export async function addUser (req) {
     if (!req.query || !req.query.id || !req.query.platform) {
       return null
     }
-    const splitedEmail = req.query.email ? req.query.email.split('@')[0] : null
     id = req.query.id
     platform = 'google'
     email = req.query.email
-    name = req.query.name || splitedEmail
+    name = req.query.name
     picture = req.query.picture
   }
+
+  const splitedEmail = email ? email.split('@')[0] : null
+  name = name || splitedEmail
 
   const user = await User.findOne({'id': id, 'platform': platform})
     .exec(async (err, user) => {
@@ -77,7 +79,16 @@ export async function addUser (req) {
     }).catch(e => {
       return null
     })
+  } else {
+    user.name = name
+    return await user.save((err, savedUser) => {
+      if (err) {
+        return null
+      }
+      return savedUser
+    })
   }
+
   return user
 }
 
