@@ -42,7 +42,7 @@ export async function addUser (req) {
     if (!req.query || !req.query.id || !req.query.platform) {
       return null
     }
-    const splitedEmail = user.email ? user.email.split('@')[0] : null
+    const splitedEmail = req.query.email ? req.query.email.split('@')[0] : null
     id = req.query.id
     platform = 'google'
     email = req.query.email
