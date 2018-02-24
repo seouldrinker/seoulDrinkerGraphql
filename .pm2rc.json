@@ -1,6 +1,6 @@
 {
   "apps": [{
-    "name": "seoulDrinkerApi",
+    "name": "seoulDrinkerGraphql",
     "script": "build/index.js",
     "watch": false,
     "env": {
