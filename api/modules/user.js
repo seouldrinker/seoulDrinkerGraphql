@@ -19,19 +19,19 @@ function _fbCommonAuth(token) {
 }
 
 
-export async function addUser (req) {
+export async function addUser (query) {
   let id = null
   let platform = null
   let email = null
   let name = null
   let picture = null
 
-  if (req.query.platform === 'facebook') {
-    if (!req.query || !req.query.access_token) {
+  if (query.platform === 'facebook') {
+    if (!query || !query.access_token) {
       return null
     }
 
-    const user = await _fbCommonAuth(req.query.access_token)
+    const user = await _fbCommonAuth(query.access_token)
 
     id = user.id || null
     platform = 'facebook'
@@ -39,14 +39,14 @@ export async function addUser (req) {
     email = user.email || null
     picture = user.picture.data.url || null
   } else {
-    if (!req.query || !req.query.id || !req.query.platform) {
+    if (!query || !query.id || !query.platform) {
       return null
     }
-    id = req.query.id
+    id = query.id
     platform = 'google'
-    email = req.query.email
-    name = req.query.name
-    picture = req.query.picture
+    email = query.email
+    name = query.name
+    picture = query.picture
   }
 
   const splitedEmail = email ? email.split('@')[0] : null
@@ -112,24 +112,5 @@ export async function getUserDetail (user_id) {
     return null
   }
 
-  const user = await User.findOne({is_ok: 1, _id: user_id})
-    .exec((err, user) => {
-    if (err) {
-      return null
-    }
-    return user
-  })
-
-  const feeds = await Feed.find({is_ok: 1, user: user._id}).sort({crt_dt: -1})
-    .populate(['beers', 'pub', 'user'])
-    .exec((err, feeds) => {
-    if (err) {
-      return null
-    }
-    return feeds
-  })
-
-  user._feeds = feeds
-
-  return user
+  return await User.findOne({is_ok: 1, _id: user_id})
 }

@@ -99,11 +99,43 @@ const typeDefs = `
     beerList(keyword: String): [Beer]
     beerRankList: [Beer]
     beerDetail(beerId: String!): Beer
+    pubList(keyword: String): [Pub]
+    pubRankList: [Pub]
+    pubDetail(pubId: String!): Pub
+    feedList(
+      type: String
+      page: Int
+      count: Int
+    ): [Feed]
+    feedPubList(
+      pubId: String!
+      type: String
+      page: Int
+      count: Int
+     ): [Feed]
+    feedBeerList(
+      beerId: String!
+      type: String
+      page: Int
+      count: Int
+     ): [Feed]
+    userDetail(userId: String!): User
+  }
+  
+  type Mutation {
+    addUser(
+      id: String
+      platform: String
+      access_token: String
+      email: String
+      name: String
+      picture: String
+    ): User
+    deleteFeed(feedId: String!): Feed
   }
 `
-// type Mutation {
-//   createMessage(input: MessageInput): Message
-//   updateMessage(id: ID!, input: MessageInput): Message
-// }
+
+// user put
+// feed add, put
 
 export default typeDefs
