@@ -1,11 +1,10 @@
 import Beer from '../models/beer'
 import Feed from '../models/feed'
-import Brewery from '../models/brewery'
 
 const SOMEWHERE_BEER = '59ec88dc32cb539aa68cca1d'
 
 
-async function _appendBeerExecuter (models, popArray) {
+async function _appendBeerExecuter (models, popArray=[]) {
   return await models.populate(popArray)
     .exec((err, beers) => {
     if (err) {
@@ -16,11 +15,11 @@ async function _appendBeerExecuter (models, popArray) {
 }
 
 
-export async function getBeerList (req) {
+export async function getBeerList (keyword) {
   const findBeers = Beer.find({is_ok: 1}).sort({kor_name: 1})
-  const beers = await _appendBeerExecuter(findBeers, [])
+  const beers = await _appendBeerExecuter(findBeers)
 
-  // 어딘가 펍 최상단으로 이동.
+  // 어딘가 비어 최상단으로 이동.
   const somewhereBeerIndex = beers.findIndex(beer => {
     return beer._id.toString() === SOMEWHERE_BEER
   })
@@ -28,11 +27,11 @@ export async function getBeerList (req) {
   beers.splice(somewhereBeerIndex, 1)
   beers.unshift(somewhereBeer)
 
-  if (req.query && req.query.keyword) {
+  if (keyword) {
     const newBeers = Object.assign([], beers)
     const tempBeers = newBeers.filter(beer => {
-      return beer.eng_name.toUpperCase().indexOf(req.query.keyword.toUpperCase()) >= 0
-        || beer.kor_name.toUpperCase().indexOf(req.query.keyword.toUpperCase()) >= 0
+      return beer.eng_name.toUpperCase().indexOf(keyword.toUpperCase()) >= 0
+        || beer.kor_name.toUpperCase().indexOf(keyword.toUpperCase()) >= 0
     })
     return tempBeers
   }
@@ -40,41 +39,34 @@ export async function getBeerList (req) {
 }
 
 
-export async function getBeerRankList (req) {
-  if (!req.session.getBeerRankList) {
-    const findBeers = Beer.find({is_ok: 1})
-    const findFeeds = Feed.find({is_ok: 1})
-    let beers = await _appendBeerExecuter(findBeers, ['brewery'])
-    let feeds = await _appendBeerExecuter(findFeeds, ['pub', 'beers'])
+export async function getBeerRankList () {
+  const findBeers = Beer.find({is_ok: 1})
+  const findFeeds = Feed.find({is_ok: 1})
+  let beers = await _appendBeerExecuter(findBeers, ['brewery'])
+  let feeds = await _appendBeerExecuter(findFeeds, ['pub', 'beers'])
 
-    beers.map(beer => {
-      beer._feedCount = 0
-      feeds.map(feed => {
-        feed.beers.map(feedBeer => {
-          if (beer._id.toString() === feedBeer._id.toString()) {
-            beer._feedCount++
-            beer._feedList.push(feed)
-          }
-        })
+  beers.map(beer => {
+    beer._feedCount = 0
+    feeds.map(feed => {
+      const ownBeer = feed.beers.filter(feedBeer => {
+        return feedBeer._id.equals(beer._id)
       })
-    })
-
-    beers.sort((a, b) => {
-      return b._feedCount - a._feedCount
-    })
-
-    let rankedBeer = []
-    beers.map((v, k) => {
-      rankedBeer[k] = {
-        beer: v,
-        rank: (v._feedCount === 0) ? 0 : k + 1
+      if (ownBeer.length > 0) {
+        beer._feedCount++
+        beer._feedList.push(feed)
       }
     })
+  })
 
-    req.session.getBeerRankList = rankedBeer
-  }
+  beers.sort((a, b) => {
+    return b._feedCount - a._feedCount
+  })
 
-  return req.session.getBeerRankList
+  let rankedBeer = []
+  beers.map((v, k) => {
+    rankedBeer[k] = v
+  })
+  return rankedBeer
 }
 
 
@@ -83,22 +75,5 @@ export async function getBeerDetail (beer_id) {
     return null
   }
 
-  const beer = await Beer.findOne({is_ok: 1, _id: beer_id}).sort({crt_dt: -1})
-    .populate('brewery').exec((err, beer) => {
-    if (err) {
-      return null
-    }
-    return beer
-  })
-
-  beer._feedList = await Feed.find({is_ok: 1, beers: {
-    $in: [beer_id]
-  }}).exec((err, feed) => {
-    if (err) {
-      return null
-    }
-    return feed
-  })
-
-  return beer
+  return await Beer.findOne({is_ok: 1, _id: beer_id}).sort({crt_dt: -1})
 }
