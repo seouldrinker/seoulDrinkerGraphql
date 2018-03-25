@@ -1,7 +1,7 @@
 {
-  "name": "seoulDrinkerApi",
+  "name": "seoulDrinkerGraphql",
   "version": "0.0.1",
-  "description": "Seoul Drinker Api for 2017 Seoul Public Data Competition",
+  "description": "Seoul Drinker GraphQL for 2017 Seoul Public Data Competition",
   "main": "build/index.js",
   "scripts": {
     "test": "mocha --compilers js:babel-core/register",

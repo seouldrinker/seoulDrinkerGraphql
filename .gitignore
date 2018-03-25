@@ -6,3 +6,5 @@ config.js
 images/
 npm-debug.log
 .idea
+dist/
+test/*
