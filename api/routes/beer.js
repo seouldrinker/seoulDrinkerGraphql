@@ -32,7 +32,7 @@ router.get('/:beer_id', async (req, res, next) => {
 })
 
 router.get('/', async (req, res, next) => {
-  const results = await getBeerList(req)
+  const results = await getBeerList(req.query.keyword || null)
 
   if (results && typeof results !== 'undefined') {
     return res.send({

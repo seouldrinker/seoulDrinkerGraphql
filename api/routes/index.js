@@ -10,15 +10,13 @@ import { checkAuth } from '../middleware/authentication'
 
 const router = express.Router()
 
-router.use('/static', express.static(__dirname + '/../../images'))
-
 // [auth]
 // router.use(checkAuth)
 
-router.use('/seoulDrinkerGraphql/vbeta/feed', feed)
-router.use('/seoulDrinkerGraphql/vbeta/pub', pub)
-router.use('/seoulDrinkerGraphql/vbeta/beer', beer)
-router.use('/seoulDrinkerGraphql/vbeta/news', news)
-router.use('/seoulDrinkerGraphql/vbeta/user', user)
+router.use('/vbeta/feed', feed)
+router.use('/vbeta/pub', pub)
+router.use('/vbeta/beer', beer)
+router.use('/vbeta/news', news)
+router.use('/vbeta/user', user)
 
 export default router

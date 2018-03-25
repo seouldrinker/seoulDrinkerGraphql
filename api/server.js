@@ -18,8 +18,10 @@ const app = express()
 const port = 8002
 
 // [routes]
+app.use('/', express.static(__dirname + '/../dist'))
+app.use('/static', express.static(__dirname + '/../images'))
 import index from './routes/index'
-app.use('/', index)
+app.use('/seoulDrinkerGraphql', index)
 
 // [DB Config]
 const MongoStore = connectMongo(session)

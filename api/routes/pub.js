@@ -32,7 +32,7 @@ router.get('/:pub_id', async (req, res, next) => {
 })
 
 router.get('/', async (req, res, next) => {
-  const results = await getPubList(req)
+  const results = await getPubList(req.query.keyword || null)
 
   if (results && typeof results !== 'undefined') {
     return res.send({
