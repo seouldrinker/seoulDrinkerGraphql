@@ -12,16 +12,15 @@ import bodyParser from 'body-parser'
 import mongoose from 'mongoose'
 import connectMongo from 'connect-mongo'
 import { DB_URL, SESSION_SECRET } from './config'
-import { graphqlExpress, graphiqlExpress } from 'apollo-server-express'
 
 const app = express()
 const port = 8002
 
 // [routes]
-app.use('/', express.static(__dirname + '/../dist'))
+app.use('/', express.static(__dirname + '/../frontend/dist'))
 app.use('/static', express.static(__dirname + '/../images'))
 import index from './routes/index'
-app.use('/seoulDrinkerGraphql', index)
+app.use('/seoulDrinkerGraphql', cors(), index)
 
 // [DB Config]
 const MongoStore = connectMongo(session)
@@ -32,10 +31,12 @@ mongoose.set('debug', true)
 db.on('error', console.error.bind(console, 'connection error:'))
 db.once('open', console.log.bind(console, "Connected to mongod server"))
 
+import { graphqlExpress, graphiqlExpress } from 'apollo-server-express'
 import schema from './graphql'
-app.use('/graphql', bodyParser.json(), graphqlExpress({ schema }))
-app.use('/graphiql', graphiqlExpress({ endpointURL: '/graphql' }))
+app.use('/graphql', cors(), bodyParser.json(), graphqlExpress({ schema }))
+app.use('/graphiql', cors(), graphiqlExpress({ endpointURL: '/graphql' }))
 
+// Middleware
 // [config - logs, cookie, cors, route, exception]
 app.use(morgan('combined', {
   stream: fs.createWriteStream(
@@ -51,7 +52,6 @@ app.use(session({
   fallbackMemory: false
 }))
 app.use(cookieParser())
-app.use(cors())
 
 // [error]
 app.use((err, req, res, next) => {

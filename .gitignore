@@ -6,5 +6,5 @@ config.js
 images/
 npm-debug.log
 .idea
-dist/
+frontend/dist
 test/*

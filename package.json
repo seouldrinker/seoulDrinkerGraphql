@@ -4,6 +4,10 @@
   "description": "Seoul Drinker GraphQL for 2017 Seoul Public Data Competition",
   "main": "build/index.js",
   "scripts": {
+
+    "front:start": "cd frontend && node build/dev-server.js && cd ../",
+    "front:build": "cd frontend && rm -rf ./dist && node build/build.js && cd ../",
+
     "test": "mocha --compilers js:babel-core/register",
     "clean": "rm -rf build/**",
     "build": "babel api --out-dir build",
